@@ -17,7 +17,7 @@ while True:
         # print(ret)#     Boolean (True / False) •	True → frame successfully captured , False → failed to capture frame
         # print(frame) # (height, width, channels)
         break
-    #frame, boxes = draw_3x3_grid(frame)  # <-- overlay grid
+    frame, boxes = draw_3x3_grid(frame)  # <-- overlay grid
     # Flip the frame horizontally
     frame = cv.flip(frame, 1)
     # (frame) can stack modifier like cv.flip, cv.resize, etc. to modify the frame before displaying it.
@@ -30,8 +30,6 @@ while True:
 #contours, hierarchy = cv2.findContours(image, mode, method[, offset])
     contours, hierarchy = cv.findContours(canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     #cv.drawContours(frame, contours, -1, (0,255,0), 3)
-
-
     
     #cv.imshow("Gray", gray)  # show the grayscale image in a window named "Gray"
     # cv.imshow("Blurred", blurred)  
