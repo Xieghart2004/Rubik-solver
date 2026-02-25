@@ -1,7 +1,5 @@
 import cv2 as cv
 
-import cv2 as cv
-
 def draw_3x3_grid(Grid_frame, cell=200, gap=10, thickness=2):
     """
     Draw a centered 3x3 grid on the frame.

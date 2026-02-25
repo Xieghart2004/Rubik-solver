@@ -27,17 +27,10 @@ while True:
     blurred = cv.GaussianBlur(gray, (3, 3), 0)
     canny = cv.Canny(blurred, 10, 50)
 
-#contours, hierarchy = cv2.findContours(image, mode, method[, offset])
     contours, hierarchy = cv.findContours(canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-    #cv.drawContours(frame, contours, -1, (0,255,0), 3)
-    
-    #cv.imshow("Gray", gray)  # show the grayscale image in a window named "Gray"
-    # cv.imshow("Blurred", blurred)  
-    #cv.imshow("Canny Edges", canny)  # show the canny edges in a window named "Canny Edges"
-    #cv.imshow("Camera", frame)  # show the camera feed in a window named "Camera"
     cv.imshow("Camera", frame)
 
-    if cv.waitKey(1) & 0xFF == ord("q"):  # Stop the camera when the user presses the 'q' key
+    if cv.waitKey(1) & 0xFF == ord("q"):  # Stop the camera
         break
 
 
