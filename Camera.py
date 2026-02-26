@@ -8,6 +8,14 @@ cap = cv.VideoCapture(0)
 
 #I just know that the origin of cordinate is at the top-left corner. lol :O
 #ROI = Region of Interest
+COLOR_LETTER = {
+    "white": "W",
+    "yellow": "Y",
+    "green": "G",
+    "blue": "B",
+    "orange": "O",
+    "red": "R",
+}
 
 RUBIK_HSV_RANGES = {
     "white": [
@@ -23,11 +31,9 @@ RUBIK_HSV_RANGES = {
         (np.array([90,  80,  40]), np.array([130, 255, 255]))
     ],
     "orange": [
-        (np.array([8,  100,  80]), np.array([19, 255, 255]))
-    ],
+        (np.array([0,120,60]), np.array([7,255,255]))    ],
     "red": [
-        (np.array([0,  120,  60]), np.array([7, 255, 255])),
-        (np.array([170,120,  60]), np.array([179,255,255]))
+        (np.array([170,120,60]), np.array([179,255,255]))
     ],
 }
 
@@ -72,32 +78,38 @@ while True:
     detected_colors = []
 
     for idx, (x1, y1, x2, y2) in enumerate(boxes):
-
+        #(0, boxes[0]). (1, boxes[1]). (2, boxes[2])
         # take center region only (avoid borders)
         margin_x = int((x2 - x1) * 0.25)
         margin_y = int((y2 - y1) * 0.25)
-
         cell = frame[
             y1 + margin_y : y2 - margin_y,
             x1 + margin_x : x2 - margin_x
         ]
 
         color_name, score = classify_cell_hsv(cell, RUBIK_HSV_RANGES)
+        letter = COLOR_LETTER.get(color_name, "?") #.get is used to retrieve the letter corresponding to the detected color name from the COLOR_LETTER dictionary. If the color name is not found in the dictionary, it returns "?" as a default value.
+        cx = (x1 + x2) // 2
+        cy = (y1 + y2) // 2
 
+        cv.putText(
+            frame,
+            letter,
+            (cx - 10, cy + 10),
+            cv.FONT_HERSHEY_SIMPLEX,
+            1.0,
+            (248, 255, 44),                      # text color (BGR)
+            2,
+            cv.LINE_AA
+        )
         detected_colors.append(color_name)
-
         print(f"Grid {idx} → {color_name}")
-    
-    print(boxes[0])
-    print(boxes[2])
-    print(boxes[6])
-    print(boxes[8])    #I dump the cordinates of the 4 corners
-
-    # (650, 230, 850, 430) -> (x1, y1, x2, y2) of top-left
-    # (1070, 230, 1270, 430) --> (x1, y1, x2, y2) of top-right
-    # (650, 650, 850, 850) --> (x1, y1, x2, y2) of bottom-left
-    # (1070, 650, 1270, 850) --> (x1, y1, x2, y2) of bottom-right
-
+    #---------------
+    # my red and orage ranges are not good enough, so I want to see the average hue of the cell to adjust the ranges.
+    #---------------
+    # hsv_cell = cv.cvtColor(cell, cv.COLOR_BGR2HSV)
+    # avg_h = np.mean(hsv_cell[:,:,0]) 
+    # print("Average Hue:", avg_h)
 
     left   = boxes[0][0]   # x1 of top-left (650)
     top    = boxes[0][1]   # y1 of top-left (230)
