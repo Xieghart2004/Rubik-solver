@@ -1,11 +1,12 @@
 import cv2 as cv
 import numpy as np
 from grid import draw_3x3_grid
+import kociemba
 
 
 print("OpenCV version:", cv.__version__)
+print("press u r f d l b → store faces")
 cap = cv.VideoCapture(0)
-
 #I just know that the origin of cordinate is at the top-left corner. lol :O
 #ROI = Region of Interest
 COLOR_LETTER = {
@@ -37,6 +38,30 @@ RUBIK_HSV_RANGES = {
     ],
 }
 
+faces = {"U": None, "R": None, "F": None, "D": None, "L": None, "B": None}
+# white  → U up
+# red    → R right
+# blue   → B back
+# orange → L left
+# green  → F front
+# yellow → D down
+
+COLOR_TO_FACE = {
+    "white": "U",
+    "red": "R",
+    "green": "F",
+    "yellow": "D",
+    "orange": "L",
+    "blue": "B",
+}
+FACE_TO_COLOR = {v: k for k, v in COLOR_TO_FACE.items()} # this is the reverse mapping of COLOR_TO_FACE
+#This is called a dictionary comprehension.
+# For every (key, value) pair inside COLOR_TO_FACE,
+# create a new dictionary where:
+# new_key = value
+# new_value = key
+def face_to_str(face9):
+    return "".join(COLOR_TO_FACE[c] for c in face9)
 
 def classify_cell_hsv(cell_bgr, ranges_dict):
     hsv = cv.cvtColor(cell_bgr, cv.COLOR_BGR2HSV)
@@ -77,6 +102,8 @@ while True:
 
     detected_colors = []
 
+    
+
     for idx, (x1, y1, x2, y2) in enumerate(boxes):
         #(0, boxes[0]). (1, boxes[1]). (2, boxes[2])
         # take center region only (avoid borders)
@@ -103,7 +130,7 @@ while True:
             cv.LINE_AA
         )
         detected_colors.append(color_name)
-        print(f"Grid {idx} → {color_name}")
+        #print(f"Grid {idx} → {color_name}")
     #---------------
     # my red and orage ranges are not good enough, so I want to see the average hue of the cell to adjust the ranges.
     #---------------
@@ -117,18 +144,69 @@ while True:
     bottom = boxes[8][3]   # y2 of bottom-right (850)
 
     roi = frame[top:bottom, left:right]
-
     gray = cv.cvtColor(roi, cv.COLOR_BGR2GRAY)  # Convert the frame to grayscale
     #hsvFrame = cv.cvtColor(roi, cv.COLOR_BGR2HSV)
     blurred = cv.GaussianBlur(gray, (3, 3), 0)
     canny = cv.Canny(blurred, 10, 50)
-
     contours, hierarchy = cv.findContours(canny, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
     cv.imshow("Camera", frame)
-    
+    key = cv.waitKey(1) & 0xFF
 
-    if cv.waitKey(1) & 0xFF == ord("q"):  # Stop the camera
+    # --- store faces ---
+    if key == ord('u'):
+        faces["U"] = detected_colors.copy()
+        print("Stored U face")
+        print("U value:", faces["U"])
+    elif key == ord('r'):
+        faces["R"] = detected_colors.copy()
+        print("Stored R face")
+        print("R value:", faces["R"])
+    elif key == ord('f'):
+        faces["F"] = detected_colors.copy()
+        print("Stored F face")
+        print("F value:", faces["F"])
+    elif key == ord('d'):
+        faces["D"] = detected_colors.copy()
+        print("Stored D face")
+        print("D value:", faces["D"])
+    elif key == ord('l'):
+        faces["L"] = detected_colors.copy()
+        print("Stored L face")
+        print("L value:", faces["L"])
+    elif key == ord('b'):
+        faces["B"] = detected_colors.copy()
+        print("Stored B face")
+        print("B value:", faces["B"])
+
+    elif key == ord('q'):
         break
+    
+# --- solve when all faces exist (optional: trigger on 's' instead) ---
+    elif key == ord('s'):
+        if not all(v is not None for v in faces.values()):
+            print("Not all faces captured yet!")
+            missing = [k for k, v in faces.items() if v is None]
+            if missing:
+                missing_colors = [FACE_TO_COLOR[m] for m in missing]
+                print("Missing faces:", missing_colors)
+        else:
+            cube_str = (
+                face_to_str(faces["U"]) +
+                face_to_str(faces["R"]) +
+                face_to_str(faces["F"]) +
+                face_to_str(faces["D"]) +
+                face_to_str(faces["L"]) +
+                face_to_str(faces["B"])
+            )
 
+            print("cube_str length:", len(cube_str))
+            print("cube_str:", cube_str)
 
+            try:
+                print("solution:", kociemba.solve(cube_str))
+            except Exception as e:
+                print("Solve error:", e)
+
+            
 
