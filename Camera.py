@@ -2,10 +2,12 @@ import cv2 as cv
 import numpy as np
 from grid import draw_3x3_grid
 import kociemba
-
+from collections import Counter
 
 print("OpenCV version:", cv.__version__)
 print("press u r f d l b → store faces")
+print("FACE Green to the camera ")
+
 cap = cv.VideoCapture(0)
 #I just know that the origin of cordinate is at the top-left corner. lol :O
 #ROI = Region of Interest
@@ -86,6 +88,14 @@ def classify_cell_hsv(cell_bgr, ranges_dict):
 
     return best_name, best_score
 
+def show_face(face_key):
+    s = face_to_str(faces[face_key])
+    print(face_key)
+    print(s[0:3])
+    print(s[3:6])
+    print(s[6:9])
+    print()
+
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
@@ -97,6 +107,8 @@ while True:
         break
     # Flip the frame horizontally
     frame = cv.flip(frame, 1)
+
+    
     frame, boxes = draw_3x3_grid(frame)  # <-- overlay grid 
     # (frame) can stack modifier like cv.flip, cv.resize, etc. to modify the frame before displaying it.
 
@@ -157,33 +169,34 @@ while True:
     if key == ord('u'):
         faces["U"] = detected_colors.copy()
         print("Stored U face")
-        print("U value:", faces["U"])
+        print("White side's value:", faces["U"])
     elif key == ord('r'):
         faces["R"] = detected_colors.copy()
         print("Stored R face")
-        print("R value:", faces["R"])
+        print("Red side's value:", faces["R"])
     elif key == ord('f'):
         faces["F"] = detected_colors.copy()
         print("Stored F face")
-        print("F value:", faces["F"])
+        print("Green side's value:", faces["F"])
     elif key == ord('d'):
         faces["D"] = detected_colors.copy()
         print("Stored D face")
-        print("D value:", faces["D"])
+        print("Yellow side's value:", faces["D"])
     elif key == ord('l'):
         faces["L"] = detected_colors.copy()
         print("Stored L face")
-        print("L value:", faces["L"])
+        print("Orange side's value:", faces["L"])
     elif key == ord('b'):
         faces["B"] = detected_colors.copy()
         print("Stored B face")
-        print("B value:", faces["B"])
+        print("Blue side's value:", faces["B"])
 
     elif key == ord('q'):
         break
     
 # --- solve when all faces exist (optional: trigger on 's' instead) ---
     elif key == ord('s'):
+        
         if not all(v is not None for v in faces.values()):
             print("Not all faces captured yet!")
             missing = [k for k, v in faces.items() if v is None]
@@ -199,7 +212,8 @@ while True:
                 face_to_str(faces["L"]) +
                 face_to_str(faces["B"])
             )
-
+            counts = Counter(cube_str)
+            print("Counts:", counts)
             print("cube_str length:", len(cube_str))
             print("cube_str:", cube_str)
 
