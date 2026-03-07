@@ -6,7 +6,7 @@ def draw_3x3_grid(Grid_frame, cell=200, gap=10, thickness=2):
     Returns: (frame, boxes)
     boxes = [(x1,y1,x2,y2), ...] 9 items, row-major order
     """
-    h, w = Grid_frame.shape[:2]
+    h, w = Grid_frame.shape[:2]# Get the height and width of the frame
 
     grid_size = 3 * cell + 2 * gap
     start_x = w // 2 - grid_size // 2
